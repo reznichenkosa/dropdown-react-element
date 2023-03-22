@@ -1,0 +1,47 @@
+.options {
+  display: flex;
+  flex-direction: column;
+
+  max-height: 312px;
+  overflow: hidden;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.options::-webkit-scrollbar {
+  display: none;
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  border-bottom: 1px solid #f4f4f4;
+  padding: 13px 16px;
+}
+
+.option:last-child {
+  border: none;
+}
+.option:first-child {
+  padding-top: 0px;
+}
+
+.option .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #c1c1c1;
+  border-radius: 6px;
+}

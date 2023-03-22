@@ -2,9 +2,10 @@ import React, { FC, useRef, useState } from "react";
 import styles from "./Dropdown.module.css";
 import cn from "classnames";
 import { ArrowIcon } from "shared/assets/icons/ArrowIcon";
-import { SearchIcon } from "shared/assets/icons/SearchIcon";
 import { CloseIcon } from "shared/assets/icons/CloseIcon";
 import { useOnClickOutside } from "shared/hooks/useClickOutside";
+import { OptionsList } from "./components/OptionsList/OptionsList";
+import { SearchInput } from "./components/SearchInput/SearchInput";
 
 export interface DropdownOption {
   title: string;
@@ -128,33 +129,14 @@ export const Dropdown: FC<DropdownProps> = (props) => {
         className={cn(styles["dropdown-menu"], { [styles["dropdown-menu-open"]]: isOpen })}
       >
         <div className={styles["search-wrapper"]}>
-          <div className={styles.search}>
-            <SearchIcon className={styles["search-icon"]} />
-            <input
-              className={styles["search-input"]}
-              value={searchQuery}
-              onChange={onChangeSearchQuery}
-              type="text"
-              placeholder="Поиск"
-            />
-          </div>
+          <SearchInput onChange={onChangeSearchQuery} searchQuery={searchQuery} />
         </div>
-        <ul className={styles.options}>
-          {filteredOptions.map((option) => (
-            <li key={option.value} className={styles.option}>
-              <div className={styles.title}>
-                {showIcon && option.icon && <span>{option.icon}</span>}
-                <span>{option.title}</span>
-              </div>
-              <input
-                checked={checkIsSelectOption(option)}
-                onChange={(e) => onChangeValue(e, option)}
-                type="checkbox"
-                className={styles.checkbox}
-              />
-            </li>
-          ))}
-        </ul>
+        <OptionsList
+          onChange={onChangeValue}
+          showIcon={showIcon}
+          options={filteredOptions}
+          checkIsSelectOption={checkIsSelectOption}
+        />
       </div>
     </div>
   );
