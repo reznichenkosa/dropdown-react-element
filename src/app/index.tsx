@@ -9,7 +9,7 @@ function App() {
         <SelectLanguages />
       </div>
       <div>
-        Обычный селект
+        Обычный селект без иконок
         <SelectLanguage />
       </div>
     </div>

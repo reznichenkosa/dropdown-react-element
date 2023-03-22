@@ -50,7 +50,8 @@ export const SelectLanguages = () => {
   };
 
   return (
-    <Dropdown<DropdownOption[]>
+    <Dropdown
+      multiple
       label="Язык"
       options={languageOptions}
       value={languages}

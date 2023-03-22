@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   EnglandFlagIcon,
   GermanFlagIcon,
-  ItalianFlagIcon,
-  PolandFlagIcon,
   RussianFlagIcon,
   SpanishFlagIcon,
 } from "shared/assets/icons/countryFlags";
@@ -33,18 +31,19 @@ const languageOptions: DropdownOption[] = [
 ];
 
 export const SelectLanguage = () => {
-  const [languages, setLanguages] = useState<DropdownOption | undefined>();
+  const [language, setLanguage] = useState<DropdownOption | undefined>();
 
-  const onChangeLanguages = (value: DropdownOption): void => {
-    setLanguages(value);
+  const onChangeLanguages = (value: DropdownOption | undefined): void => {
+    setLanguage(value);
   };
 
   return (
-    <Dropdown<DropdownOption>
+    <Dropdown
       label="Язык"
       multiple={false}
       options={languageOptions}
-      value={languages}
+      value={language}
+      showIcon={false}
       onChange={onChangeLanguages}
     />
   );

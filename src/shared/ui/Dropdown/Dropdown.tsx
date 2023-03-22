@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import styles from "./Dropdown.module.css";
 import cn from "classnames";
 import { ArrowIcon } from "shared/assets/icons/ArrowIcon";
@@ -12,30 +12,32 @@ export interface DropdownOption {
   icon?: JSX.Element;
 }
 
-type DropdownValue<T> = T extends DropdownOption[] ? DropdownOption[] : DropdownOption | undefined;
-
-interface DropdownProps<T> {
-  label?: string;
-  multiple?: boolean;
-  options: DropdownOption[];
-  value: DropdownValue<T>;
-  showIcon?: boolean;
-  onChange: (value: any) => void;
+interface MultipleDropdownProps {
+  multiple: true;
+  value: DropdownOption[];
+  onChange: (value: DropdownOption[]) => void;
 }
 
-const valueIsArray = (
-  value: DropdownOption | DropdownOption[] | undefined
-): value is Array<DropdownOption> => {
-  return Array.isArray(value);
-};
+interface SingleDropdownProps {
+  multiple: false;
+  value: DropdownOption | undefined;
+  onChange: (value: DropdownOption | undefined) => void;
+}
 
-export const Dropdown = <T extends DropdownOption[] | DropdownOption>(
-  props: DropdownProps<T>
-): JSX.Element => {
-  const { multiple = false, showIcon = true, options, onChange, value, label } = props;
+interface DropdownCommonProps {
+  label?: string;
+  options: DropdownOption[];
+  showIcon?: boolean;
+}
+
+type DropdownProps = DropdownCommonProps & (MultipleDropdownProps | SingleDropdownProps);
+
+export const Dropdown: FC<DropdownProps> = (props) => {
+  const { multiple, showIcon = true, options, onChange, value, label } = props;
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownMenuRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef<HTMLSpanElement>(null);
 
   const filteredOptions = options.filter((option) =>
     option.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,55 +47,62 @@ export const Dropdown = <T extends DropdownOption[] | DropdownOption>(
     setSearchQuery(e.target.value);
   };
 
-  const openDropdownMenu = (): void => {
-    if (!isOpen) {
-      setIsOpen(true);
-    }
+  const toggleOpenDropdownMenu = (): void => {
+    setIsOpen((prev) => !prev);
   };
 
-  const checkOption = (option: DropdownOption): boolean => {
-    if (valueIsArray(value)) {
+  const checkIsSelectOption = (option: DropdownOption): boolean => {
+    if (multiple) {
       return value.find((item) => item.value === option.value) ? true : false;
     } else {
       return option.value === value?.value;
     }
   };
 
-  const changeValue = (e: React.ChangeEvent<HTMLInputElement>, option: DropdownOption) => {
-    if (valueIsArray(value)) {
+  const onChangeValue = (e: React.ChangeEvent<HTMLInputElement>, option: DropdownOption) => {
+    if (multiple) {
       const newValue = !e.target.checked
         ? value.filter((item) => item.value !== option.value)
         : [...value, option];
       onChange(newValue);
     } else {
-      onChange(option);
+      const newValue = value?.value === option.value ? undefined : option;
+
+      onChange(newValue);
     }
   };
 
-  const deleteOption = (
+  const onRemoveOption = (
     e: React.MouseEvent<SVGSVGElement, MouseEvent>,
     option: DropdownOption
   ): void => {
     e.stopPropagation();
-    if (valueIsArray(value)) {
+    if (multiple) {
       const newValue = value.filter((item) => item.value !== option.value);
       onChange(newValue);
     }
   };
 
-  const onClickOutsideDropdownMenu = () => {
+  const hideDropdownMenu = (e: Event) => {
+    const el = valueRef?.current;
+    if (!el || el.contains((e?.target as Node) || null)) {
+      return;
+    }
     if (isOpen) {
       setIsOpen(false);
+      setTimeout(() => {
+        setSearchQuery("");
+      }, 300);
     }
   };
 
-  useOnClickOutside(dropdownMenuRef, onClickOutsideDropdownMenu);
+  useOnClickOutside(dropdownMenuRef, hideDropdownMenu);
 
   return (
     <div className={styles.wrapper}>
       {label && <span className={styles.label}>{label}</span>}
-      <span className={styles.value} onClick={openDropdownMenu}>
-        {valueIsArray(value)
+      <span ref={valueRef} className={styles.value} onClick={toggleOpenDropdownMenu}>
+        {multiple
           ? value.map((item) => (
               <span
                 onClick={(e) => {
@@ -103,7 +112,7 @@ export const Dropdown = <T extends DropdownOption[] | DropdownOption>(
                 key={item.value}
               >
                 <span>{item.title}</span>
-                <CloseIcon onClick={(e) => deleteOption(e, item)} />
+                <CloseIcon onClick={(e) => onRemoveOption(e, item)} />
               </span>
             ))
           : value?.title && (
@@ -138,8 +147,8 @@ export const Dropdown = <T extends DropdownOption[] | DropdownOption>(
                 <span>{option.title}</span>
               </div>
               <input
-                checked={checkOption(option)}
-                onChange={(e) => changeValue(e, option)}
+                checked={checkIsSelectOption(option)}
+                onChange={(e) => onChangeValue(e, option)}
                 type="checkbox"
                 className={styles.checkbox}
               />
